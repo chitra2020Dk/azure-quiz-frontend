@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-const API_URL = "https://quizgo-app-b04f.azurewebsites.net"; // <-- Replace with your actual Azure backend URL
+const API_URL = "https://quizgo-app-apajc5dgeje5ageh.westeurope-01.azurewebsites.net";
 
 const QuizApp = () => {
   const [questionData, setQuestionData] = useState(null);
