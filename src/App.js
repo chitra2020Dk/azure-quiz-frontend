@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 
+const API_URL = "https://quizgo-app-b04f.azurewebsites.net"; // <-- Replace with your actual Azure backend URL
+
 const QuizApp = () => {
   const [questionData, setQuestionData] = useState(null);
   const [result, setResult] = useState(null);
@@ -8,7 +10,7 @@ const QuizApp = () => {
   const [selectedOption, setSelectedOption] = useState(null);
 
   const fetchQuestion = () => {
-    fetch("http://localhost:5000/question")
+    fetch(`${API_URL}/question`)
       .then((res) => res.json())
       .then((data) => {
         setQuestionData(data);
@@ -23,7 +25,7 @@ const QuizApp = () => {
   const handleAnswer = (option) => {
     setSelectedOption(option);
 
-    fetch("http://localhost:5000/answer", {
+    fetch(`${API_URL}/answer`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -121,7 +123,6 @@ const QuizApp = () => {
 // ----------------------------
 // Styles object
 // ----------------------------
-
 const styles = {
   container: {
     height: "100vh",
@@ -132,10 +133,7 @@ const styles = {
     background: "linear-gradient(135deg, #e3f2fd, #ffffff)",
     fontFamily: "Segoe UI, Arial",
   },
-  title: {
-    color: "#0078D4",
-    marginBottom: "20px",
-  },
+  title: { color: "#0078D4", marginBottom: "20px" },
   card: {
     background: "#ffffff",
     padding: "30px",
@@ -144,16 +142,8 @@ const styles = {
     width: "60%",
     textAlign: "center",
   },
-  question: {
-    fontSize: "20px",
-    marginBottom: "20px",
-    fontWeight: "500",
-  },
-  optionsGrid: {
-    display: "grid",
-    gridTemplateColumns: "1fr 1fr",
-    gap: "10px",
-  },
+  question: { fontSize: "20px", marginBottom: "20px", fontWeight: "500" },
+  optionsGrid: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" },
   button: {
     padding: "12px",
     borderRadius: "8px",
@@ -163,20 +153,9 @@ const styles = {
     cursor: "pointer",
     transition: "0.3s",
   },
-  correct: {
-    color: "green",
-    fontWeight: "bold",
-    marginTop: "15px",
-  },
-  wrong: {
-    color: "red",
-    fontWeight: "bold",
-    marginTop: "15px",
-  },
-  score: {
-    marginTop: "15px",
-    fontWeight: "bold",
-  },
+  correct: { color: "green", fontWeight: "bold", marginTop: "15px" },
+  wrong: { color: "red", fontWeight: "bold", marginTop: "15px" },
+  score: { marginTop: "15px", fontWeight: "bold" },
 };
 
 export default QuizApp;
