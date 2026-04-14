@@ -15,13 +15,16 @@ const QuizApp = () => {
   const [name, setName] = useState("");
   const [time, setTime] = useState(10);
 
+  // ✅ ADDED: results history
+  const [results, setResults] = useState([]);
+
   const fetchQuestion = () => {
     fetch(`${API_URL}/question`)
       .then((res) => res.json())
       .then((data) => {
         setQuestionData(data);
         setSelectedOption(null);
-        setTime(10); // reset timer
+        setTime(10);
       });
   };
 
@@ -38,7 +41,7 @@ const QuizApp = () => {
     const timer = setInterval(() => {
       setTime((prev) => {
         if (prev === 1) {
-          handleAnswer(""); // auto submit if time ends
+          handleAnswer("");
           return 10;
         }
         return prev - 1;
@@ -74,7 +77,14 @@ const QuizApp = () => {
             fetchQuestion();
           }, 1200);
         } else {
-          setTimeout(() => setQuizEnd(true), 1200);
+          // ✅ ADDED: store result before ending quiz
+          setTimeout(() => {
+            setResults((prev) => [
+              ...prev,
+              { name: name, score: score }
+            ]);
+            setQuizEnd(true);
+          }, 1200);
         }
       });
   };
@@ -88,7 +98,7 @@ const QuizApp = () => {
     setPin("");
   };
 
-  // 🎯 PIN + NAME SCREEN
+  // 🎯 LOGIN SCREEN
   if (!quizStarted) {
     return (
       <div style={styles.container}>
@@ -124,7 +134,7 @@ const QuizApp = () => {
     );
   }
 
-  // 🎉 QUIZ END
+  // 🎉 QUIZ END SCREEN
   if (quizEnd) {
     return (
       <div style={styles.container}>
@@ -132,6 +142,14 @@ const QuizApp = () => {
           <h2>🎉 Quiz Finished</h2>
           <h3>👤 {name}</h3>
           <h1>🔥 Score: {score}</h1>
+
+          <h3>📊 All Players Results</h3>
+
+          {results.map((r, index) => (
+            <p key={index}>
+              👤 {r.name} — 🔥 {r.score}
+            </p>
+          ))}
 
           <button onClick={restartQuiz} style={styles.startButton}>
             🔄 Restart
