@@ -9,6 +9,10 @@ const QuizApp = () => {
   const [quizEnd, setQuizEnd] = useState(false);
   const [selectedOption, setSelectedOption] = useState(null);
 
+  // NEW STATES
+  const [quizStarted, setQuizStarted] = useState(false);
+  const [pin, setPin] = useState("");
+
   const fetchQuestion = () => {
     fetch(`${API_URL}/question`)
       .then((res) => res.json())
@@ -19,8 +23,10 @@ const QuizApp = () => {
   };
 
   useEffect(() => {
-    fetchQuestion();
-  }, []);
+    if (quizStarted) {
+      fetchQuestion();
+    }
+  }, [quizStarted]);
 
   const handleAnswer = (option) => {
     setSelectedOption(option);
@@ -51,12 +57,43 @@ const QuizApp = () => {
       });
   };
 
+  // 🎯 PIN SCREEN
+  if (!quizStarted) {
+    return (
+      <div style={styles.container}>
+        <h1 style={{ fontSize: "40px" }}>🎯 Enter Quiz PIN</h1>
+
+        <input
+          type="text"
+          placeholder="Enter PIN (1234)"
+          value={pin}
+          onChange={(e) => setPin(e.target.value)}
+          style={styles.input}
+        />
+
+        <button
+          onClick={() => {
+            if (pin === "1234") {
+              setQuizStarted(true);
+            } else {
+              alert("❌ Wrong PIN");
+            }
+          }}
+          style={styles.startButton}
+        >
+          Start Quiz 🚀
+        </button>
+      </div>
+    );
+  }
+
+  // 🎉 QUIZ END
   if (quizEnd) {
     return (
       <div style={styles.container}>
         <div style={styles.card}>
           <h2>🎉 Quiz Finished</h2>
-          <p style={styles.score}>Your Score: {score}</p>
+          <h1>🔥 Score: {score}</h1>
         </div>
       </div>
     );
@@ -64,33 +101,38 @@ const QuizApp = () => {
 
   if (!questionData) return <p>Loading...</p>;
 
+  const colors = ["#ff4d4d", "#4CAF50", "#2196F3", "#FFC107"];
+
   return (
     <div style={styles.container}>
-      <h1 style={styles.title}>Azure Quiz App</h1>
+      <h1 style={styles.title}>🚀 Azure Quiz App</h1>
 
       <div style={styles.card}>
         <p style={styles.question}>{questionData.question}</p>
 
         <div style={styles.optionsGrid}>
-          {questionData.options.map((option) => {
-            let buttonStyle = styles.button;
+          {questionData.options.map((option, index) => {
+            let buttonStyle = {
+              ...styles.button,
+              backgroundColor: colors[index],
+            };
 
             if (selectedOption) {
               if (option === selectedOption) {
                 buttonStyle = {
-                  ...styles.button,
+                  ...buttonStyle,
                   backgroundColor:
                     option === result?.correctAnswer ? "#4CAF50" : "#f44336",
                 };
               } else if (option === result?.correctAnswer) {
                 buttonStyle = {
-                  ...styles.button,
+                  ...buttonStyle,
                   backgroundColor: "#4CAF50",
                 };
               } else {
                 buttonStyle = {
-                  ...styles.button,
-                  opacity: 0.6,
+                  ...buttonStyle,
+                  opacity: 0.5,
                 };
               }
             }
@@ -110,19 +152,17 @@ const QuizApp = () => {
 
         {result && (
           <p style={result.correct ? styles.correct : styles.wrong}>
-            {result.correct ? "✅ Correct!" : "❌ Wrong!"}
+            {result.correct ? "🎉 Correct!" : "❌ Wrong!"}
           </p>
         )}
 
-        <p style={styles.score}>Score: {score}</p>
+        <h3 style={styles.score}>🔥 Score: {score}</h3>
       </div>
     </div>
   );
 };
 
-// ----------------------------
-// Styles object
-// ----------------------------
+// 🎨 STYLES
 const styles = {
   container: {
     height: "100vh",
@@ -130,32 +170,74 @@ const styles = {
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
-    background: "linear-gradient(135deg, #e3f2fd, #ffffff)",
+    background:
+      "linear-gradient(135deg, #ff0080, #7928ca, #2afadf)",
     fontFamily: "Segoe UI, Arial",
+    color: "white",
   },
-  title: { color: "#0078D4", marginBottom: "20px" },
+  title: {
+    marginBottom: "20px",
+    fontSize: "32px",
+  },
   card: {
     background: "#ffffff",
     padding: "30px",
-    borderRadius: "15px",
-    boxShadow: "0 8px 20px rgba(0,0,0,0.1)",
+    borderRadius: "20px",
+    boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
     width: "60%",
     textAlign: "center",
+    color: "black",
   },
-  question: { fontSize: "20px", marginBottom: "20px", fontWeight: "500" },
-  optionsGrid: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" },
+  question: {
+    fontSize: "22px",
+    marginBottom: "20px",
+    fontWeight: "600",
+  },
+  optionsGrid: {
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr",
+    gap: "12px",
+  },
   button: {
-    padding: "12px",
-    borderRadius: "8px",
+    padding: "15px",
+    borderRadius: "12px",
     border: "none",
-    backgroundColor: "#0078D4",
+    fontSize: "16px",
+    fontWeight: "bold",
     color: "white",
     cursor: "pointer",
-    transition: "0.3s",
   },
-  correct: { color: "green", fontWeight: "bold", marginTop: "15px" },
-  wrong: { color: "red", fontWeight: "bold", marginTop: "15px" },
-  score: { marginTop: "15px", fontWeight: "bold" },
+  correct: {
+    color: "green",
+    fontWeight: "bold",
+    marginTop: "15px",
+  },
+  wrong: {
+    color: "red",
+    fontWeight: "bold",
+    marginTop: "15px",
+  },
+  score: {
+    marginTop: "15px",
+    fontWeight: "bold",
+  },
+  input: {
+    padding: "12px",
+    fontSize: "18px",
+    borderRadius: "10px",
+    border: "none",
+    marginBottom: "10px",
+    textAlign: "center",
+  },
+  startButton: {
+    padding: "12px 20px",
+    borderRadius: "10px",
+    border: "none",
+    backgroundColor: "#4CAF50",
+    color: "white",
+    fontSize: "16px",
+    cursor: "pointer",
+  },
 };
 
 export default QuizApp;
