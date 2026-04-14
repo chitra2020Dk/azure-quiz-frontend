@@ -17,6 +17,7 @@ const QuizApp = () => {
 
   const [questionCount, setQuestionCount] = useState(0);
 
+  // 📌 FETCH QUESTION
   const fetchQuestion = () => {
     fetch(`${API_URL}/question`)
       .then((res) => res.json())
@@ -24,17 +25,18 @@ const QuizApp = () => {
         setQuestionData(data);
         setSelectedOption(null);
         setTime(10);
-
-        setQuestionCount((prev) => prev + 1);
       });
   };
 
+  // 📌 START QUIZ
   useEffect(() => {
     if (quizStarted && !quizEnd) {
+      setQuestionCount(0);
       fetchQuestion();
     }
   }, [quizStarted]);
 
+  // ⏱ TIMER
   useEffect(() => {
     if (!quizStarted || quizEnd || !questionData) return;
 
@@ -51,6 +53,7 @@ const QuizApp = () => {
     return () => clearInterval(timer);
   }, [questionData]);
 
+  // 📌 ANSWER HANDLER
   const handleAnswer = (option) => {
     if (selectedOption) return;
 
@@ -67,14 +70,15 @@ const QuizApp = () => {
       .then((data) => {
         setResult(data);
 
-        // ✅ FIX: update score safely
-        let updatedScore = score;
+        // ✅ FIXED SCORE UPDATE
         if (data.correct) {
-          updatedScore = score + 1;
-          setScore(updatedScore);
+          setScore((prev) => prev + 1);
         }
 
-        if (questionCount >= 4) {
+        const nextCount = questionCount + 1;
+
+        // 🛑 STOP AFTER 4 QUESTIONS
+        if (nextCount >= 4) {
           setTimeout(() => setQuizEnd(true), 1000);
           return;
         }
@@ -82,6 +86,7 @@ const QuizApp = () => {
         if (data.nextQuestionAvailable) {
           setTimeout(() => {
             setResult(null);
+            setQuestionCount(nextCount);
             fetchQuestion();
           }, 1000);
         } else {
@@ -90,15 +95,22 @@ const QuizApp = () => {
       });
   };
 
+  // 🔄 RESTART QUIZ
   const restartQuiz = () => {
     setScore(0);
     setQuizEnd(false);
     setQuizStarted(false);
     setName("");
     setPin("");
+
+    setQuestionData(null);
+    setSelectedOption(null);
+    setResult(null);
+    setTime(10);
     setQuestionCount(0);
   };
 
+  // 🎯 LOGIN SCREEN
   if (!quizStarted) {
     return (
       <div style={styles.container}>
@@ -121,6 +133,14 @@ const QuizApp = () => {
         <button
           onClick={() => {
             if (pin === "1234" && name) {
+              setScore(0);
+              setQuizEnd(false);
+              setQuestionData(null);
+              setSelectedOption(null);
+              setResult(null);
+              setTime(10);
+              setQuestionCount(0);
+
               setQuizStarted(true);
             } else {
               alert("Enter valid name & PIN");
@@ -134,6 +154,7 @@ const QuizApp = () => {
     );
   }
 
+  // 🎉 END SCREEN
   if (quizEnd) {
     return (
       <div style={styles.container}>
@@ -215,6 +236,7 @@ const QuizApp = () => {
   );
 };
 
+// 🎨 STYLES
 const styles = {
   container: {
     height: "100vh",
