@@ -1,4 +1,4 @@
-name: Build and deploy Node.js app to Azure Web App
+name: Build and deploy React app to Azure Web App
 
 on:
   push:
@@ -23,7 +23,7 @@ jobs:
       - name: Build React app
         run: CI=false npm run build
 
-      - name: Upload build artifact
+      - name: Upload build folder
         uses: actions/upload-artifact@v4
         with:
           name: build
@@ -40,7 +40,7 @@ jobs:
           name: build
           path: build
 
-      - name: Deploy to Azure
+      - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'quizgo-app-frondend'
