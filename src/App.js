@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 
-const API_URL = "https://quizgo-app-apajc5dgeje5ageh.westeurope-01.azurewebsites.net";
+const API_URL =
+  "https://quizgo-app-apajc5dgeje5ageh.westeurope-01.azurewebsites.net";
 
 const QuizApp = () => {
   const [questionData, setQuestionData] = useState(null);
@@ -9,14 +10,12 @@ const QuizApp = () => {
   const [quizEnd, setQuizEnd] = useState(false);
   const [selectedOption, setSelectedOption] = useState(null);
 
-  // NEW FEATURES
   const [quizStarted, setQuizStarted] = useState(false);
   const [pin, setPin] = useState("");
   const [name, setName] = useState("");
   const [time, setTime] = useState(10);
 
-  // ✅ ADDED: results history
-  const [results, setResults] = useState([]);
+  const [questionCount, setQuestionCount] = useState(0);
 
   const fetchQuestion = () => {
     fetch(`${API_URL}/question`)
@@ -25,16 +24,17 @@ const QuizApp = () => {
         setQuestionData(data);
         setSelectedOption(null);
         setTime(10);
+
+        setQuestionCount((prev) => prev + 1);
       });
   };
 
   useEffect(() => {
-    if (quizStarted) {
+    if (quizStarted && !quizEnd) {
       fetchQuestion();
     }
   }, [quizStarted]);
 
-  // ⏱ TIMER
   useEffect(() => {
     if (!quizStarted || quizEnd || !questionData) return;
 
@@ -67,38 +67,38 @@ const QuizApp = () => {
       .then((data) => {
         setResult(data);
 
+        // ✅ FIX: update score safely
+        let updatedScore = score;
         if (data.correct) {
-          setScore((prev) => prev + 1);
+          updatedScore = score + 1;
+          setScore(updatedScore);
+        }
+
+        if (questionCount >= 4) {
+          setTimeout(() => setQuizEnd(true), 1000);
+          return;
         }
 
         if (data.nextQuestionAvailable) {
           setTimeout(() => {
             setResult(null);
             fetchQuestion();
-          }, 1200);
+          }, 1000);
         } else {
-          // ✅ ADDED: store result before ending quiz
-          setTimeout(() => {
-            setResults((prev) => [
-              ...prev,
-              { name: name, score: score }
-            ]);
-            setQuizEnd(true);
-          }, 1200);
+          setTimeout(() => setQuizEnd(true), 1000);
         }
       });
   };
 
-  // 🔄 RESTART
   const restartQuiz = () => {
     setScore(0);
     setQuizEnd(false);
     setQuizStarted(false);
     setName("");
     setPin("");
+    setQuestionCount(0);
   };
 
-  // 🎯 LOGIN SCREEN
   if (!quizStarted) {
     return (
       <div style={styles.container}>
@@ -134,7 +134,6 @@ const QuizApp = () => {
     );
   }
 
-  // 🎉 QUIZ END SCREEN
   if (quizEnd) {
     return (
       <div style={styles.container}>
@@ -142,14 +141,6 @@ const QuizApp = () => {
           <h2>🎉 Quiz Finished</h2>
           <h3>👤 {name}</h3>
           <h1>🔥 Score: {score}</h1>
-
-          <h3>📊 All Players Results</h3>
-
-          {results.map((r, index) => (
-            <p key={index}>
-              👤 {r.name} — 🔥 {r.score}
-            </p>
-          ))}
 
           <button onClick={restartQuiz} style={styles.startButton}>
             🔄 Restart
@@ -167,6 +158,7 @@ const QuizApp = () => {
     <div style={styles.container}>
       <h2>👤 Player: {name}</h2>
       <h2>⏱ Time: {time}s</h2>
+      <h3>📊 Question: {questionCount}/4</h3>
 
       <div style={styles.card}>
         <p style={styles.question}>{questionData.question}</p>
@@ -223,7 +215,6 @@ const QuizApp = () => {
   );
 };
 
-// 🎨 STYLES
 const styles = {
   container: {
     height: "100vh",
