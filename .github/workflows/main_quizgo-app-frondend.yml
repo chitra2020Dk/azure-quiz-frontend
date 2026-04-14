@@ -43,5 +43,5 @@ jobs:
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'quizgo-app-frondend'
-          package: build
+          package: .
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_DE1B122DE7654B1E9BC821F7FA0A9DC2 }}
